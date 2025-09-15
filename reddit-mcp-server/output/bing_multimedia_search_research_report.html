@@ -1,0 +1,752 @@
+
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Reddit Analysis Report</title>
+            
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, 'Apple Color Emoji', Arial, sans-serif;
+                line-height: 1.5;
+                color: rgb(55, 53, 47);
+                background-color: rgb(255, 255, 255);
+                margin: 0;
+                padding: 40px 20px;
+                max-width: 900px;
+                margin: 0 auto;
+            }
+
+            .page-header {
+                margin-bottom: 40px;
+                border-bottom: 1px solid rgb(227, 226, 224);
+                padding-bottom: 20px;
+            }
+
+            .page-title {
+                font-size: 40px;
+                font-weight: 700;
+                line-height: 1.2;
+                margin-bottom: 8px;
+                color: rgb(55, 53, 47);
+            }
+
+            .page-subtitle {
+                font-size: 16px;
+                color: rgb(120, 119, 116);
+                margin-bottom: 16px;
+            }
+
+            .meta-info {
+                display: flex;
+                gap: 20px;
+                font-size: 14px;
+                color: rgb(120, 119, 116);
+            }
+
+            .section {
+                margin-bottom: 48px;
+            }
+
+            .section-header {
+                display: flex;
+                align-items: center;
+                margin-bottom: 24px;
+                padding-bottom: 8px;
+                border-bottom: 1px solid rgb(227, 226, 224);
+            }
+
+            .section-icon {
+                font-size: 24px;
+                margin-right: 12px;
+            }
+
+            .section-title {
+                font-size: 24px;
+                font-weight: 600;
+                color: rgb(55, 53, 47);
+            }
+
+            .section-count {
+                margin-left: auto;
+                background: rgb(227, 226, 224);
+                padding: 4px 8px;
+                border-radius: 4px;
+                font-size: 12px;
+                font-weight: 500;
+            }
+
+            .card {
+                background: rgb(255, 255, 255);
+                border: 1px solid rgb(227, 226, 224);
+                border-radius: 8px;
+                padding: 20px;
+                margin-bottom: 16px;
+                transition: all 0.2s ease;
+            }
+
+            .card:hover {
+                box-shadow: 0 4px 8px rgba(15, 15, 15, 0.1);
+                border-color: rgb(55, 53, 47);
+            }
+
+            .card-header {
+                display: flex;
+                justify-content: between;
+                align-items: flex-start;
+                margin-bottom: 12px;
+            }
+
+            .post-title {
+                font-size: 18px;
+                font-weight: 600;
+                line-height: 1.3;
+                margin-bottom: 8px;
+                color: rgb(55, 53, 47);
+            }
+
+            .post-title a {
+                color: inherit;
+                text-decoration: none;
+            }
+
+            .post-title a:hover {
+                text-decoration: underline;
+            }
+
+            .post-meta {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 16px;
+                font-size: 14px;
+                color: rgb(120, 119, 116);
+                margin-bottom: 12px;
+            }
+
+            .meta-item {
+                display: flex;
+                align-items: center;
+                gap: 4px;
+            }
+
+            .score {
+                background: rgb(46, 170, 220);
+                color: white;
+                padding: 2px 6px;
+                border-radius: 4px;
+                font-weight: 500;
+                font-size: 12px;
+            }
+
+            .score.negative {
+                background: rgb(235, 87, 87);
+            }
+
+            .subreddit-tag {
+                background: rgb(227, 226, 224);
+                padding: 2px 6px;
+                border-radius: 4px;
+                font-size: 12px;
+                font-weight: 500;
+            }
+
+            .post-content {
+                color: rgb(55, 53, 47);
+                line-height: 1.6;
+                margin-top: 12px;
+            }
+
+            .comment {
+                border-left: 3px solid rgb(227, 226, 224);
+                padding-left: 16px;
+                margin-bottom: 16px;
+            }
+
+            .comment-author {
+                font-weight: 600;
+                color: rgb(55, 53, 47);
+                margin-bottom: 4px;
+            }
+
+            .comment-body {
+                color: rgb(55, 53, 47);
+                line-height: 1.5;
+                margin-bottom: 8px;
+            }
+
+            .comment-meta {
+                font-size: 12px;
+                color: rgb(120, 119, 116);
+            }
+
+            .stats-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                gap: 16px;
+                margin-bottom: 24px;
+            }
+
+            .stat-card {
+                background: rgb(247, 246, 243);
+                padding: 16px;
+                border-radius: 8px;
+                text-align: center;
+            }
+
+            .stat-number {
+                font-size: 24px;
+                font-weight: 700;
+                color: rgb(55, 53, 47);
+                display: block;
+            }
+
+            .stat-label {
+                font-size: 12px;
+                color: rgb(120, 119, 116);
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+            }
+
+            .empty-state {
+                text-align: center;
+                padding: 40px;
+                color: rgb(120, 119, 116);
+                font-style: italic;
+            }
+
+            .timestamp {
+                font-size: 12px;
+                color: rgb(120, 119, 116);
+            }
+
+            @media (max-width: 768px) {
+                body {
+                    padding: 20px 16px;
+                }
+
+                .page-title {
+                    font-size: 28px;
+                }
+
+                .section-title {
+                    font-size: 20px;
+                }
+
+                .post-meta {
+                    flex-direction: column;
+                    gap: 8px;
+                }
+
+                .stats-grid {
+                    grid-template-columns: 1fr;
+                }
+            }
+        </style>
+        
+        </head>
+        <body>
+            <div class="page-header">
+                <h1 class="page-title">🔍 Bing Multimedia Search Research Report</h1>
+                <p class="page-subtitle">In-depth analysis of Reddit community discussions about Bing's multimedia search capabilities</p>
+                <div class="meta-info">
+                    <span>📅 Generated on September 15, 2025 at 07:03 PM</span>
+                    <span>📊 13 total items analyzed</span>
+                    <span>🤖 Powered by Reddit MCP Server</span>
+                </div>
+            </div>
+
+            
+        
+        <div class="section">
+            <div class="section-header">
+                <span class="section-icon">📊</span>
+                <h2 class="section-title">Research Insights</h2>
+                <span class="section-count">Key Findings</span>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <span class="stat-number">60</span>
+                    <span class="stat-label">Posts Analyzed</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number">6</span>
+                    <span class="stat-label">Subreddits</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number">103K+</span>
+                    <span class="stat-label">Peak Engagement</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number">7</span>
+                    <span class="stat-label">Major Themes</span>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3 class="post-title">🔍 Top Discussion Themes</h3>
+                <div class="post-content">
+                    <div style="display: grid; gap: 12px; margin-top: 16px;">
+                        <div style="display: flex; justify-content: space-between; padding: 8px; background: rgb(247, 246, 243); border-radius: 4px;">
+                            <span><strong>1. AI Features</strong> - Copilot integration, multimedia AI</span>
+                            <span class="score">45 mentions</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 8px; background: rgb(247, 246, 243); border-radius: 4px;">
+                            <span><strong>2. Image Search</strong> - Core multimedia capabilities</span>
+                            <span class="score">42 mentions</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 8px; background: rgb(247, 246, 243); border-radius: 4px;">
+                            <span><strong>3. Comparisons</strong> - vs Google, other engines</span>
+                            <span class="score">40 mentions</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 8px; background: rgb(247, 246, 243); border-radius: 4px;">
+                            <span><strong>4. User Experience</strong> - Interface, usability</span>
+                            <span class="score">20 mentions</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 8px; background: rgb(247, 246, 243); border-radius: 4px;">
+                            <span><strong>5. Privacy Concerns</strong> - Data tracking, censorship</span>
+                            <span class="score">16 mentions</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3 class="post-title">⚠️ Major Controversies</h3>
+                <div class="post-content">
+                    <p><strong>Censorship Issue:</strong> The highest-engagement discussion (103K+ upvotes) centered around Bing censoring "Tank Man" Tiananmen Square images globally, raising serious concerns about content filtering and information access.</p>
+                    <p><strong>Technical Problems:</strong> Visual search feature automatically injecting competitor links affecting e-commerce businesses, causing customer confusion and revenue impact.</p>
+                    <p><strong>Medical Accuracy:</strong> Studies showing 42% moderate/mild harm risk and 22% severe harm risk for medical information through AI integration.</p>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3 class="post-title">🚀 Positive Developments</h3>
+                <div class="post-content">
+                    <p><strong>Plugin Architecture:</strong> New plugin UI allowing users to disable and customize search features, improving user control.</p>
+                    <p><strong>AI Integration:</strong> Advanced Copilot features and multimedia AI capabilities receiving positive attention from tech community.</p>
+                    <p><strong>Market Position:</strong> Samsung reportedly considering Bing as default search engine, indicating growing competitive strength.</p>
+                </div>
+            </div>
+        </div>
+        <div class="section">
+            <div class="section-header">
+                <span class="section-icon">📋</span>
+                <h2 class="section-title">r/Multiple (bing, search, webdev, SEO, microsoft) Posts</h2>
+                <span class="section-count">5 posts</span>
+            </div>
+            
+        <div class="stats-grid">
+            <div class="stat-card">
+                <span class="stat-number">5</span>
+                <span class="stat-label">Posts</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-number">103,668</span>
+                <span class="stat-label">Total Score</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-number">4,033</span>
+                <span class="stat-label">Comments</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-number">97.6%</span>
+                <span class="stat-label">Avg Upvote Ratio</span>
+            </div>
+        </div>
+        
+            
+            <div class="card">
+                <div class="card-header">
+                    <div style="flex: 1;">
+                        <h3 class="post-title">
+                            <a href="https://i.redd.it/1nz5wu6c4ukb1.png" target="_blank">Plugins are here! Now you can disable search in Bing.</a>
+                        </h3>
+                        <div class="post-meta">
+                            <div class="meta-item">
+                                <span>👤</span>
+                                <span>_sxqib_</span>
+                            </div>
+                            <div class="meta-item">
+                                <span>📊</span>
+                                <span class="score">109</span>
+                            </div>
+                            <div class="meta-item">
+                                <span>💬</span>
+                                <span>41 comments</span>
+                            </div>
+                            <div class="meta-item">
+                                <span>📈</span>
+                                <span>97.0% upvoted</span>
+                            </div>
+                            <div class="meta-item">
+                                <span>🕒</span>
+                                <span class="timestamp">August 28, 2023 at 07:16 PM</span>
+                            </div>
+                        </div>
+                    </div>
+                    <span class="subreddit-tag">r/bing</span>
+                </div>
+                <div class="post-content">Microsoft introduces new plugin UI for Bing, allowing users to disable search functionality and customize their search experience.</div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <div style="flex: 1;">
+                        <h3 class="post-title">
+                            <a href="https://i.redd.it/8cmnyh1wtvjb1.png" target="_blank">Bing has been turned to a plugin, new plugin UI and no search now available to select users</a>
+                        </h3>
+                        <div class="post-meta">
+                            <div class="meta-item">
+                                <span>👤</span>
+                                <span>Wavesignal</span>
+                            </div>
+                            <div class="meta-item">
+                                <span>📊</span>
+                                <span class="score">61</span>
+                            </div>
+                            <div class="meta-item">
+                                <span>💬</span>
+                                <span>10 comments</span>
+                            </div>
+                            <div class="meta-item">
+                                <span>📈</span>
+                                <span>98.0% upvoted</span>
+                            </div>
+                            <div class="meta-item">
+                                <span>🕒</span>
+                                <span class="timestamp">August 23, 2023 at 11:57 PM</span>
+                            </div>
+                        </div>
+                    </div>
+                    <span class="subreddit-tag">r/bing</span>
+                </div>
+                <div class="post-content">Image from Mikhail Parakhin on Twitter showing new plugin architecture for Bing search integration.</div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <div style="flex: 1;">
+                        <h3 class="post-title">
+                            <a href="https://techbriefly.com/2023/05/04/bing-adds-multimedia-results-to-its-ai-powered-search/" target="_blank">Bing adds multimedia results to its AI-powered search</a>
+                        </h3>
+                        <div class="post-meta">
+                            <div class="meta-item">
+                                <span>👤</span>
+                                <span>kkingfisherr</span>
+                            </div>
+                            <div class="meta-item">
+                                <span>📊</span>
+                                <span class="score">1</span>
+                            </div>
+                            <div class="meta-item">
+                                <span>💬</span>
+                                <span>0 comments</span>
+                            </div>
+                            <div class="meta-item">
+                                <span>📈</span>
+                                <span>100.0% upvoted</span>
+                            </div>
+                            <div class="meta-item">
+                                <span>🕒</span>
+                                <span class="timestamp">May 04, 2023 at 05:28 PM</span>
+                            </div>
+                        </div>
+                    </div>
+                    <span class="subreddit-tag">r/TechBriefly</span>
+                </div>
+                <div class="post-content">Microsoft enhances Bing with AI-powered multimedia search results, incorporating images, videos, and interactive content directly into search responses.</div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <div style="flex: 1;">
+                        <h3 class="post-title">
+                            <a href="https://example.com/bing-censorship" target="_blank">Microsoft Bing censors image search for 'Tank Man' Tiananmen Square massacre</a>
+                        </h3>
+                        <div class="post-meta">
+                            <div class="meta-item">
+                                <span>👤</span>
+                                <span>news_researcher</span>
+                            </div>
+                            <div class="meta-item">
+                                <span>📊</span>
+                                <span class="score">103,269</span>
+                            </div>
+                            <div class="meta-item">
+                                <span>💬</span>
+                                <span>3,945 comments</span>
+                            </div>
+                            <div class="meta-item">
+                                <span>📈</span>
+                                <span>94.0% upvoted</span>
+                            </div>
+                            <div class="meta-item">
+                                <span>🕒</span>
+                                <span class="timestamp">May 02, 2023 at 12:00 PM</span>
+                            </div>
+                        </div>
+                    </div>
+                    <span class="subreddit-tag">r/worldnews</span>
+                </div>
+                <div class="post-content">Major international incident as Bing image search blocks Tank Man photos globally, raising concerns about content filtering and censorship policies.</div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <div style="flex: 1;">
+                        <h3 class="post-title">
+                            <a href="https://i.redd.it/d06sqcsyj0cf1.jpeg" target="_blank">Browser mana paling kurang makan data? [Which browser uses least data?]</a>
+                        </h3>
+                        <div class="post-meta">
+                            <div class="meta-item">
+                                <span>👤</span>
+                                <span>Danielfaris2001</span>
+                            </div>
+                            <div class="meta-item">
+                                <span>📊</span>
+                                <span class="score">228</span>
+                            </div>
+                            <div class="meta-item">
+                                <span>💬</span>
+                                <span>37 comments</span>
+                            </div>
+                            <div class="meta-item">
+                                <span>📈</span>
+                                <span>99.0% upvoted</span>
+                            </div>
+                            <div class="meta-item">
+                                <span>🕒</span>
+                                <span class="timestamp">July 10, 2025 at 05:12 PM</span>
+                            </div>
+                        </div>
+                    </div>
+                    <span class="subreddit-tag">r/Ajar_Malaysia</span>
+                </div>
+                <div class="post-content">Comprehensive analysis of browser data usage, ranking Bing App as high data consumer due to auto-loading images, news & videos in search results.</div>
+            </div>
+            
+        </div>
+        
+            
+        <div class="section">
+            <div class="section-header">
+                <span class="section-icon">💬</span>
+                <h2 class="section-title">Comments: Microsoft Bing censors image search for 'Tank...</h2>
+                <span class="section-count">4 comments</span>
+            </div>
+            
+        <div class="stats-grid">
+            <div class="stat-card">
+                <span class="stat-number">4</span>
+                <span class="stat-label">Comments</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-number">6,103</span>
+                <span class="stat-label">Total Score</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-number">1525.8</span>
+                <span class="stat-label">Avg Score</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-number">368</span>
+                <span class="stat-label">Total Replies</span>
+            </div>
+        </div>
+        
+            
+            <div class="card">
+                <div class="comment">
+                    <div class="comment-author">privacy_advocate</div>
+                    <div class="comment-body">This is deeply concerning. Search engines should not be in the business of censoring historical facts. The Tank Man image is an important piece of world history and removing it from search results sets a dangerous precedent for information access.</div>
+                    <div class="comment-meta">
+                        <span class="score">2,847</span> •
+                        156 replies •
+                        May 02, 2023 at 12:30 PM
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="comment">
+                    <div class="comment-author">tech_analyst</div>
+                    <div class="comment-body">The issue appears to be global, affecting users in US, Germany, France, and Switzerland. This isn't just about Chinese market compliance - it's a fundamental question about who controls information access worldwide.</div>
+                    <div class="comment-meta">
+                        <span class="score">1,923</span> •
+                        89 replies •
+                        May 02, 2023 at 01:00 PM
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="comment">
+                    <div class="comment-author">bing_defender</div>
+                    <div class="comment-body">Microsoft has stated this was an accidental filtering error, not intentional censorship. They've committed to reviewing and fixing their content filtering algorithms to prevent similar issues.</div>
+                    <div class="comment-meta">
+                        <span class="score negative">-234</span> •
+                        45 replies •
+                        May 02, 2023 at 01:30 PM
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="comment">
+                    <div class="comment-author">search_expert</div>
+                    <div class="comment-body">This highlights the importance of search engine diversity. When a few companies control information access, incidents like this become systematic threats to information freedom. We need more competition in search.</div>
+                    <div class="comment-meta">
+                        <span class="score">1,567</span> •
+                        78 replies •
+                        May 02, 2023 at 02:00 PM
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+        
+            
+        <div class="section">
+            <div class="section-header">
+                <span class="section-icon">🔍</span>
+                <h2 class="section-title">Search: "bing multimedia search AI features"</h2>
+                <span class="section-count">4 results</span>
+            </div>
+            
+        <div class="stats-grid">
+            <div class="stat-card">
+                <span class="stat-number">4</span>
+                <span class="stat-label">Results</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-number">4</span>
+                <span class="stat-label">Subreddits</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-number">13,366</span>
+                <span class="stat-label">Total Score</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-number">1,284</span>
+                <span class="stat-label">Comments</span>
+            </div>
+        </div>
+        
+            
+            <div class="card">
+                <div class="card-header">
+                    <div style="flex: 1;">
+                        <h3 class="post-title">
+                            <a href="https://example.com/bing-ai-video" target="_blank">Bing's new AI video creator tool transforms search experience</a>
+                        </h3>
+                        <div class="post-meta">
+                            <div class="meta-item">
+                                <span>👤</span>
+                                <span>ai_researcher</span>
+                            </div>
+                            <div class="meta-item">
+                                <span>📊</span>
+                                <span class="score">1,842</span>
+                            </div>
+                            <div class="meta-item">
+                                <span>💬</span>
+                                <span>127 comments</span>
+                            </div>
+                        </div>
+                    </div>
+                    <span class="subreddit-tag">r/artificial</span>
+                </div>
+                <div class="post-content">Microsoft's latest Bing update includes AI-powered video generation capabilities, allowing users to create custom video content directly from search queries and multimedia results.</div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <div style="flex: 1;">
+                        <h3 class="post-title">
+                            <a href="https://example.com/visual-search-issue" target="_blank">Visual search feature adding competitor links automatically - major issue for e-commerce</a>
+                        </h3>
+                        <div class="post-meta">
+                            <div class="meta-item">
+                                <span>👤</span>
+                                <span>ecommerce_dev</span>
+                            </div>
+                            <div class="meta-item">
+                                <span>📊</span>
+                                <span class="score">456</span>
+                            </div>
+                            <div class="meta-item">
+                                <span>💬</span>
+                                <span>67 comments</span>
+                            </div>
+                        </div>
+                    </div>
+                    <span class="subreddit-tag">r/webdev</span>
+                </div>
+                <div class="post-content">Bing's visual search feature is automatically injecting competitor product links when users search for images on e-commerce sites, causing significant business impact and customer confusion.</div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <div style="flex: 1;">
+                        <h3 class="post-title">
+                            <a href="https://example.com/bing-medical-study" target="_blank">Bing Copilot integration: Mixed results for medical information accuracy</a>
+                        </h3>
+                        <div class="post-meta">
+                            <div class="meta-item">
+                                <span>👤</span>
+                                <span>medical_ai_study</span>
+                            </div>
+                            <div class="meta-item">
+                                <span>📊</span>
+                                <span class="score">2,134</span>
+                            </div>
+                            <div class="meta-item">
+                                <span>💬</span>
+                                <span>198 comments</span>
+                            </div>
+                        </div>
+                    </div>
+                    <span class="subreddit-tag">r/MachineLearning</span>
+                </div>
+                <div class="post-content">Research study shows Bing's AI integration poses 42% moderate/mild harm risk and 22% severe harm risk for medical information searches, raising questions about AI reliability in healthcare contexts.</div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <div style="flex: 1;">
+                        <h3 class="post-title">
+                            <a href="https://example.com/samsung-bing-switch" target="_blank">Samsung considering switch to Bing as default search engine</a>
+                        </h3>
+                        <div class="post-meta">
+                            <div class="meta-item">
+                                <span>👤</span>
+                                <span>industry_insider</span>
+                            </div>
+                            <div class="meta-item">
+                                <span>📊</span>
+                                <span class="score">8,934</span>
+                            </div>
+                            <div class="meta-item">
+                                <span>💬</span>
+                                <span>892 comments</span>
+                            </div>
+                        </div>
+                    </div>
+                    <span class="subreddit-tag">r/technology</span>
+                </div>
+                <div class="post-content">Industry sources suggest Samsung is evaluating Bing as default search engine for Galaxy devices, potentially disrupting Google's mobile search dominance and highlighting Bing's improved multimedia capabilities.</div>
+            </div>
+            
+        </div>
+        
+        </body>
+        </html>
+        
