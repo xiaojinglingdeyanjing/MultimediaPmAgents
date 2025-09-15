@@ -33,13 +33,18 @@ def get_reddit_client():
 @mcp.tool()
 async def get_subreddit_posts(subreddit_name: str, sort_by: str = "hot", limit: int = 10) -> str:
     """
-    Get posts from a Reddit subreddit.
-    
+    Get posts from a Reddit subreddit for user & product analysis.
+
+    Use this tool when collecting Reddit data for:
+    - User sentiment analysis and feedback collection
+    - Product research, reviews, and market insights
+    - Community discussions around specific topics or brands
+
     Args:
         subreddit_name: Name of the subreddit (without r/)
         sort_by: Sort method - 'hot', 'new', 'top', 'rising'
         limit: Maximum number of posts to retrieve (1-100)
-    
+
     Returns:
         JSON string containing post data
     """
@@ -102,12 +107,17 @@ async def get_subreddit_posts(subreddit_name: str, sort_by: str = "hot", limit: 
 @mcp.tool()
 async def get_post_comments(post_url: str, limit: int = 10) -> str:
     """
-    Get comments from a specific Reddit post.
-    
+    Get comments from a specific Reddit post for user & product analysis.
+
+    Use this tool when collecting Reddit data for:
+    - Deep-dive sentiment analysis on specific discussions
+    - Understanding user reactions and detailed feedback
+    - Analyzing conversation patterns around products or topics
+
     Args:
         post_url: Full URL of the Reddit post
         limit: Maximum number of top-level comments to retrieve (1-50)
-    
+
     Returns:
         String containing formatted comment data
     """
@@ -151,8 +161,13 @@ async def get_post_comments(post_url: str, limit: int = 10) -> str:
 @mcp.tool()
 async def search_reddit(query: str, sort: str = "relevance", time_filter: str = "all", limit: int = 10) -> str:
     """
-    Search Reddit posts across all subreddits.
-    
+    Search Reddit posts across all subreddits for user & product analysis.
+
+    Use this tool when collecting Reddit data for:
+    - Broad market research across multiple communities
+    - Brand mention tracking and reputation monitoring
+    - Competitor analysis and industry trend identification
+
     Args:
         query: Search query string
         sort: Sort method - 'relevance', 'hot', 'top', 'new', 'comments'
