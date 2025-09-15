@@ -1,0 +1,44 @@
+{
+  "name": "Reddit MCP Server for Market Research",
+  "description": "A GitHub Copilot Extension that provides AI assistants with access to Reddit data for user sentiment analysis and product research",
+  "homepage_url": "https://github.com/xiaojinglingdeyanjing/MultimediaPmAgents",
+  "callback_urls": [
+    "http://localhost:8080/callback"
+  ],
+  "request_oauth_on_install": false,
+  "setup_on_update": false,
+  "public": true,
+  "default_events": [],
+  "default_permissions": {
+    "copilot_chat": "read",
+    "copilot_editor_context": "read"
+  },
+  "agent": {
+    "type": "mcp_server",
+    "url": "python reddit-mcp-server/src/reddit_mcp_server.py",
+    "description": "MCP server that provides Reddit data analysis capabilities",
+    "capabilities": [
+      "subreddit_posts",
+      "post_comments",
+      "reddit_search"
+    ]
+  },
+  "metadata": {
+    "version": "1.0.0",
+    "category": "productivity",
+    "tags": [
+      "reddit",
+      "market-research",
+      "sentiment-analysis",
+      "user-feedback",
+      "data-collection"
+    ],
+    "use_cases": [
+      "Market research and competitor analysis",
+      "User sentiment tracking and feedback collection",
+      "Brand monitoring and reputation management",
+      "Product launch feedback analysis",
+      "Community insights and trend identification"
+    ]
+  }
+}

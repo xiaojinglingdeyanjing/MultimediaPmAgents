@@ -2,7 +2,14 @@
   "permissions": {
     "allow": [
       "WebSearch",
-      "Bash(rm:*)"
+      "Bash(rm:*)",
+      "Bash(git remote add:*)",
+      "Bash(git push:*)",
+      "Bash(gh repo view:*)",
+      "Bash(python -m pytest --version)",
+      "Bash(pip install:*)",
+      "Bash(C:/Users/tianzijiang/AppData/Local/anaconda3/python.exe -m pip install -r reddit-mcp-server/requirements.txt)",
+      "Bash(python:*)"
     ],
     "deny": [],
     "ask": []
