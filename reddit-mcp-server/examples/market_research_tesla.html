@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tesla Market Research - Reddit Community Analysis</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 8px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+            position: relative;
+        }
+        .header::before {
+            content: "🚗";
+            font-size: 4rem;
+            opacity: 0.1;
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 2.8rem;
+            font-weight: 700;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        .header p {
+            margin: 15px 0 0;
+            opacity: 0.95;
+            font-size: 1.2rem;
+            font-weight: 300;
+        }
+        .content {
+            padding: 40px;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            transform: translateY(0);
+            transition: transform 0.3s ease;
+        }
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        .stat-label {
+            font-size: 1rem;
+            opacity: 0.9;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .section {
+            margin-bottom: 50px;
+        }
+        .section h2 {
+            color: #333;
+            margin-bottom: 25px;
+            font-size: 2rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .section h2::before {
+            content: attr(data-icon);
+            font-size: 1.5rem;
+        }
+        .discussion-item {
+            background: #fff;
+            border: 1px solid #e9ecef;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            border-left: 5px solid #ff416c;
+            position: relative;
+        }
+        .discussion-title {
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 12px;
+            font-size: 1.2rem;
+        }
+        .discussion-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            color: #666;
+            font-size: 0.95rem;
+            margin-bottom: 15px;
+            align-items: center;
+        }
+        .discussion-content {
+            color: #555;
+            line-height: 1.7;
+            margin-bottom: 15px;
+        }
+        .sentiment-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .positive { background: #d1f2eb; color: #0e6b4a; }
+        .neutral { background: #fef9e7; color: #b7791f; }
+        .negative { background: #fadbd8; color: #a93226; }
+        .trend-analysis {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 35px;
+            border-radius: 16px;
+            margin: 30px 0;
+        }
+        .trend-analysis h3 {
+            margin-top: 0;
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+        }
+        .trend-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px 20px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border-left: 4px solid rgba(255, 255, 255, 0.5);
+        }
+        .subreddit-tag {
+            background: #f8f9fa;
+            color: #495057;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            display: inline-block;
+            margin: 2px;
+        }
+        .competitive-insights {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            padding: 35px;
+            border-radius: 16px;
+            color: #333;
+            margin-top: 30px;
+        }
+        .competitive-insights h3 {
+            margin-top: 0;
+            color: #2c3e50;
+            font-size: 1.8rem;
+        }
+        .insight-point {
+            background: white;
+            padding: 15px;
+            margin: 12px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            position: relative;
+            padding-left: 45px;
+        }
+        .insight-point::before {
+            content: "📈";
+            position: absolute;
+            left: 15px;
+            top: 15px;
+            font-size: 1.2rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Tesla Community Analysis</h1>
+            <p>Market Research & Brand Sentiment from Reddit Communities</p>
+        </div>
+
+        <div class="content">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number">1,247</div>
+                    <div class="stat-label">Posts Analyzed</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">68%</div>
+                    <div class="stat-label">Positive Sentiment</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">8.9k</div>
+                    <div class="stat-label">Community Comments</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">15</div>
+                    <div class="stat-label">Subreddits Monitored</div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2 data-icon="🔥">Trending Discussions</h2>
+
+                <div class="discussion-item">
+                    <div class="discussion-title">Cybertruck delivery experiences - mixed but mostly positive</div>
+                    <div class="discussion-meta">
+                        <span>👍 3.2k upvotes</span>
+                        <span>💬 834 comments</span>
+                        <span class="sentiment-badge positive">📈 Positive</span>
+                        <div class="subreddit-tag">r/cybertruck</div>
+                        <div class="subreddit-tag">r/teslamotors</div>
+                    </div>
+                    <div class="discussion-content">
+                        Early adopters sharing delivery stories with enthusiasm for build quality and performance, though some concerns about panel gaps and software bugs in initial deliveries.
+                    </div>
+                </div>
+
+                <div class="discussion-item">
+                    <div class="discussion-title">FSD Beta v12 showing significant improvements</div>
+                    <div class="discussion-meta">
+                        <span>👍 2.8k upvotes</span>
+                        <span>💬 567 comments</span>
+                        <span class="sentiment-badge positive">📈 Positive</span>
+                        <div class="subreddit-tag">r/teslamotors</div>
+                        <div class="subreddit-tag">r/selfdrivingcars</div>
+                    </div>
+                    <div class="discussion-content">
+                        Users reporting smoother navigation, better object recognition, and more human-like driving behavior. However, some still hesitant about full autonomy.
+                    </div>
+                </div>
+
+                <div class="discussion-item">
+                    <div class="discussion-title">Supercharger network reliability concerns in winter</div>
+                    <div class="discussion-meta">
+                        <span>👍 1.9k upvotes</span>
+                        <span>💬 445 comments</span>
+                        <span class="sentiment-badge negative">📉 Negative</span>
+                        <div class="subreddit-tag">r/electricvehicles</div>
+                        <div class="subreddit-tag">r/teslamotors</div>
+                    </div>
+                    <div class="discussion-content">
+                        Multiple reports of charging issues during cold weather, with some stations experiencing downtime. Users calling for more robust infrastructure.
+                    </div>
+                </div>
+            </div>
+
+            <div class="trend-analysis">
+                <h3>📊 Key Market Trends</h3>
+                <div class="trend-item">
+                    <strong>Premium EV Competition:</strong> Increased mentions of Lucid Air, BMW iX, and Mercedes EQS as viable alternatives, showing market maturation.
+                </div>
+                <div class="trend-item">
+                    <strong>Software-First Approach:</strong> Users consistently praise Tesla's OTA updates and software ecosystem over traditional automakers.
+                </div>
+                <div class="trend-item">
+                    <strong>Charging Infrastructure:</strong> Supercharger network remains a key differentiator, despite reliability concerns in extreme weather.
+                </div>
+                <div class="trend-item">
+                    <strong>Price Sensitivity:</strong> Growing discussion about Tesla's pricing strategy as competition increases and economic concerns rise.
+                </div>
+            </div>
+
+            <div class="section">
+                <h2 data-icon="⚡">Brand Sentiment Analysis</h2>
+
+                <div class="discussion-item">
+                    <div class="discussion-title">Innovation Leadership</div>
+                    <div class="discussion-content">
+                        <strong>Positive Mentions:</strong> FSD technology, battery efficiency, manufacturing scale<br>
+                        <strong>Sentiment Score:</strong> 82% positive across 450+ mentions
+                    </div>
+                </div>
+
+                <div class="discussion-item">
+                    <div class="discussion-title">Customer Service & Quality</div>
+                    <div class="discussion-content">
+                        <strong>Mixed Feedback:</strong> Service center availability, build quality consistency<br>
+                        <strong>Sentiment Score:</strong> 58% positive, improvement needed
+                    </div>
+                </div>
+
+                <div class="discussion-item">
+                    <div class="discussion-title">Value Proposition</div>
+                    <div class="discussion-content">
+                        <strong>Market Position:</strong> Premium but justifiable for early adopters<br>
+                        <strong>Sentiment Score:</strong> 71% positive, price-conscious discussions increasing
+                    </div>
+                </div>
+            </div>
+
+            <div class="competitive-insights">
+                <h3>🎯 Strategic Insights & Recommendations</h3>
+
+                <div class="insight-point">
+                    <strong>Strengthen Service Network:</strong> Address recurring complaints about service center availability and appointment scheduling to improve overall brand perception.
+                </div>
+
+                <div class="insight-point">
+                    <strong>Winter Infrastructure Focus:</strong> Invest in cold-weather charging solutions to maintain competitive advantage as more EVs enter harsh climate markets.
+                </div>
+
+                <div class="insight-point">
+                    <strong>Quality Control Communication:</strong> Be more transparent about quality improvements and manufacturing processes to address build quality concerns.
+                </div>
+
+                <div class="insight-point">
+                    <strong>Competitive Positioning:</strong> Emphasize software ecosystem and charging network as key differentiators as hardware gap with competitors narrows.
+                </div>
+
+                <div class="insight-point">
+                    <strong>Community Engagement:</strong> Leverage strong enthusiast community for beta testing and feedback, while addressing legitimate concerns proactively.
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
