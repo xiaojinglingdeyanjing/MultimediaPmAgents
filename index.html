@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>20-20 Eye Rest Timer</title>
+  <title>20-20-20 Eye Rest Timer</title>
   <style>
     :root {
       --bg: #0f172a;
@@ -176,13 +176,13 @@
 
   <script>
     const STORAGE_KEY = 'eye-rest-daily-data-v1';
-    const REMINDER_SECONDS = 20 * 60;
+    const REMINDER_INTERVAL_SECONDS = 20 * 60;
     const REST_SECONDS = 20;
 
     const state = {
       running: false,
       dayStart: null,
-      reminderLeft: REMINDER_SECONDS,
+      reminderLeft: REMINDER_INTERVAL_SECONDS,
       reminderTimer: null,
       restTimer: null,
       restLeft: REST_SECONDS,
@@ -251,6 +251,7 @@
       if (!AudioCtx) return;
       const ctx = new AudioCtx();
       const now = ctx.currentTime;
+      // Offset values are in seconds to produce a short triple-beep pattern.
       [0, 0.22, 0.44].forEach((offset) => {
         const osc = ctx.createOscillator();
         const gain = ctx.createGain();
@@ -297,7 +298,7 @@
 
     function startReminderLoop() {
       clearInterval(state.reminderTimer);
-      state.reminderLeft = REMINDER_SECONDS;
+      state.reminderLeft = REMINDER_INTERVAL_SECONDS;
       updateReminderUI();
       els.reminderHint.textContent = 'Timer is running.';
 
@@ -308,7 +309,7 @@
           beep();
           notify('Time to rest your eyes', '20 seconds break starts now.');
           startRest();
-          state.reminderLeft = REMINDER_SECONDS;
+          state.reminderLeft = REMINDER_INTERVAL_SECONDS;
           updateReminderUI();
         }
       }, 1000);
@@ -316,7 +317,7 @@
 
     function stopReminderLoop() {
       clearInterval(state.reminderTimer);
-      state.reminderLeft = REMINDER_SECONDS;
+      state.reminderLeft = REMINDER_INTERVAL_SECONDS;
       updateReminderUI();
       els.reminderHint.textContent = 'Starts after you click “Start Day”.';
     }
@@ -339,6 +340,12 @@
       const usageMs = Math.max(0, end - rec.start);
       const fullDayMs = 24 * 60 * 60 * 1000;
       const offMs = Math.max(0, fullDayMs - usageMs);
+
+      if (!rec.finish) {
+        els.todayUsage.textContent = `Tracked usage so far: ${formatDuration(usageMs)}`;
+        els.todayOff.textContent = 'Off-phone / sleep time: finish day to finalize';
+        return;
+      }
 
       els.todayUsage.textContent = `Tracked usage: ${formatDuration(usageMs)}`;
       els.todayOff.textContent = `Off-phone / sleep time: ${formatDuration(offMs)}`;
