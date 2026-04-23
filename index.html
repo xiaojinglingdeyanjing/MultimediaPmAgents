@@ -1,420 +1,440 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gemini 3 Market Insights</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        :root {
-            --primary: #4285F4;
-            --secondary: #AA00FF; /* Gemini purple-ish */
-            --accent: #00C853;
-            --bg: #FAFAFA;
-            --surface: #FFFFFF;
-            --text: #1F2937;
-            --text-light: #6B7280;
-            --border: #E5E7EB;
-            --gradient: linear-gradient(135deg, #4285F4 0%, #AA00FF 100%);
-        }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
-        
-        /* Layout */
-        .container { max-width: 1000px; margin: 0 auto; padding: 0 20px; }
-        section { padding: 60px 0; border-bottom: 1px solid var(--border); }
-        section:last-child { border-bottom: none; }
-
-        /* Header */
-        header {
-            background: var(--surface);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-            backdrop-filter: blur(10px);
-            background: rgba(255, 255, 255, 0.9);
-        }
-        .nav-container {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            height: 70px;
-        }
-        .logo { font-weight: 700; font-size: 1.2rem; background: var(--gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        nav ul { display: flex; gap: 20px; list-style: none; }
-        nav a { text-decoration: none; color: var(--text-light); font-size: 0.9rem; font-weight: 500; transition: color 0.2s; }
-        nav a:hover, nav a.active { color: var(--primary); }
-
-        /* Hero */
-        .hero { text-align: center; padding: 80px 0 40px; }
-        .hero h1 { font-size: 3rem; font-weight: 800; margin-bottom: 10px; letter-spacing: -0.02em; }
-        .hero p { color: var(--text-light); font-size: 1.2rem; margin-bottom: 40px; }
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 20px; margin-top: 40px; }
-        .stat-card { background: var(--surface); padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.02); border: 1px solid var(--border); }
-        .stat-value { font-size: 2rem; font-weight: 700; color: var(--primary); }
-        .stat-label { font-size: 0.9rem; color: var(--text-light); }
-
-        /* Cards & Grid */
-        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
-        .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
-        
-        .card {
-            background: var(--surface);
-            border-radius: 16px;
-            padding: 30px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.03);
-            border: 1px solid var(--border);
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-        .card:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
-        
-        h2 { font-size: 2rem; margin-bottom: 30px; font-weight: 700; letter-spacing: -0.01em; }
-        h3 { font-size: 1.2rem; margin-bottom: 15px; font-weight: 600; }
-
-        /* Tabs */
-        .tabs { display: flex; gap: 10px; margin-bottom: 20px; background: #f1f3f4; padding: 5px; border-radius: 10px; width: fit-content; }
-        .tab-btn {
-            padding: 8px 20px;
-            border: none;
-            background: transparent;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 500;
-            color: var(--text-light);
-            transition: all 0.2s;
-        }
-        .tab-btn.active { background: var(--surface); color: var(--text); box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-
-        /* Timeline */
-        .timeline { position: relative; padding-left: 30px; border-left: 2px solid var(--border); }
-        .timeline-item { margin-bottom: 30px; position: relative; }
-        .timeline-item::before {
-            content: ''; position: absolute; left: -36px; top: 5px; width: 10px; height: 10px;
-            background: var(--primary); border-radius: 50%; border: 4px solid var(--bg);
-        }
-        .timeline-date { font-size: 0.85rem; color: var(--text-light); font-weight: 600; margin-bottom: 5px; }
-
-        /* Sentiment Chart */
-        .chart-container { position: relative; height: 300px; width: 100%; }
-
-        /* Use Cases */
-        .use-case-item { margin-bottom: 15px; }
-        .progress-bar { background: #eee; height: 8px; border-radius: 4px; overflow: hidden; margin-top: 5px; }
-        .progress-fill { height: 100%; background: var(--gradient); border-radius: 4px; width: 0; transition: width 1s ease-out; }
-
-        /* Testimonials */
-        .testimonial { font-style: italic; color: var(--text); position: relative; padding-left: 20px; }
-        .testimonial::before { content: '"'; position: absolute; left: 0; top: -10px; font-size: 3rem; color: var(--border); font-family: serif; }
-        .author { margin-top: 10px; font-style: normal; font-size: 0.9rem; color: var(--text-light); font-weight: 500; }
-
-        /* Footer */
-        footer { text-align: center; padding: 40px; color: var(--text-light); font-size: 0.9rem; border-top: 1px solid var(--border); margin-top: 40px; }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .grid-2 { grid-template-columns: 1fr; }
-            .hero h1 { font-size: 2rem; }
-            .nav-container { flex-direction: column; height: auto; padding: 10px 0; }
-            nav ul { gap: 10px; flex-wrap: wrap; justify-content: center; }
-        }
-        
-        .badge { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 600; margin-bottom: 10px; }
-        .badge-green { background: #DCFCE7; color: #166534; }
-        .badge-red { background: #FEE2E2; color: #991B1B; }
-        .badge-blue { background: #DBEAFE; color: #1E40AF; }
-    </style>
-</head>
-<body>
-
-<header>
-    <div class="container nav-container">
-        <div class="logo">Gemini 3 Insights</div>
-        <nav>
-            <ul>
-                <li><a href="#overview">Overview</a></li>
-                <li><a href="#timeline">Timeline</a></li>
-                <li><a href="#findings">Findings</a></li>
-                <li><a href="#usecases">Use Cases</a></li>
-                <li><a href="#sentiment">Sentiment</a></li>
-            </ul>
-        </nav>
-    </div>
-</header>
-
-<main class="container">
-    
-    <!-- Hero Section -->
-    <section id="overview" class="hero">
-        <div class="badge badge-blue">Market Research Report • Nov 24, 2025</div>
-        <h1>The Gemini 3 Phase Transition</h1>
-        <p>Comprehensive analysis of 170+ sources across X, Reddit, and YouTube.</p>
-        
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-value">62%</div>
-                <div class="stat-label">Positive Sentiment</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-value">1.5M+</div>
-                <div class="stat-label">Views Analyzed</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-value">#1</div>
-                <div class="stat-label">Use Case: UI/UX</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-value">90%</div>
-                <div class="stat-label">Retention Rate</div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Executive Summary -->
-    <section>
-        <div class="card">
-            <h3>Executive Summary</h3>
-            <p>Gemini 3 represents a technical leap with a <strong>65% positive sentiment on X/Twitter</strong>. While benchmarks show superiority, real-world usage reveals a "Reality Gap" marked by context loss issues. However, breakthrough capabilities in <strong>UI/UX design</strong> and <strong>handwriting recognition</strong> are driving a massive shift in user adoption.</p>
-        </div>
-    </section>
-
-    <!-- Timeline -->
-    <section id="timeline">
-        <h2>Key Events Timeline</h2>
-        <div class="timeline">
-            <div class="timeline-item">
-                <div class="timeline-date">Nov 20-24</div>
-                <h3>Reality Check Period</h3>
-                <p>Sentiment stabilizes to 55-60% as users encounter context loss limits.</p>
-            </div>
-            <div class="timeline-item">
-                <div class="timeline-date">Nov 18-19</div>
-                <h3>Official Release</h3>
-                <p>Gemini 3.0/2.0 Flash launch. Topped LMArena leaderboards immediately.</p>
-            </div>
-            <div class="timeline-item">
-                <div class="timeline-date">Nov 13</div>
-                <h3>UI/UX Viral Moment</h3>
-                <p>"Best one shot UI design" testimonials flood X/Twitter.</p>
-            </div>
-            <div class="timeline-item">
-                <div class="timeline-date">Nov 11</div>
-                <h3>Historian Test Breakthrough</h3>
-                <p>Expert-level accuracy on 18th-century handwriting confirmed.</p>
-            </div>
-            <div class="timeline-item">
-                <div class="timeline-date">Nov 6</div>
-                <h3>Accuracy Concerns</h3>
-                <p>Study publishing 76% error rate goes viral.</p>
-            </div>
-        </div>
-    </section>
-
-    <!-- Findings -->
-    <section id="findings">
-        <h2>Key Findings</h2>
-        <div class="tabs">
-            <button class="tab-btn active" onclick="showTab('positive')">Strengths</button>
-            <button class="tab-btn" onclick="showTab('negative')">Weaknesses</button>
-            <button class="tab-btn" onclick="showTab('strategic')">Strategic</button>
-        </div>
-
-        <div id="positive" class="findings-content grid-2">
-            <div class="card">
-                <div class="badge badge-green">Breakthrough</div>
-                <h3>UI/UX Design Excellence</h3>
-                <p>Canvas feature is a game-changer. Users report "One shot" success for website and app interfaces.</p>
-            </div>
-            <div class="card">
-                <div class="badge badge-green">Productivity</div>
-                <h3>Coding Powerhouse</h3>
-                <p>10x gains in Python. Complex design docs executed in seconds. "Perfect code without bugs" for prototypes.</p>
-            </div>
-            <div class="card">
-                <div class="badge badge-green">Unique Moat</div>
-                <h3>Handwriting Recognition</h3>
-                <p>First model to achieve expert-human accuracy on historical cursive. A major unlock for digitization.</p>
-            </div>
-            <div class="card">
-                <div class="badge badge-green">Stickiness</div>
-                <h3>Ecosystem Integration</h3>
-                <p>90% 3-month retention. Workspace integration is driving users away from standalone tools.</p>
-            </div>
-        </div>
-
-        <div id="negative" class="findings-content grid-2" style="display: none;">
-            <div class="card">
-                <div class="badge badge-red">Critical</div>
-                <h3>Context Amnesia</h3>
-                <p>The "Goldfish Memory" effect. Forgets context after 8-20 prompts, forcing restarts.</p>
-            </div>
-            <div class="card">
-                <div class="badge badge-red">Reliability</div>
-                <h3>Hallucinations & Errors</h3>
-                <p>76% error rate in some studies. Confuses dates and stock tickers after long sessions.</p>
-            </div>
-            <div class="card">
-                <div class="badge badge-red">Behavior</div>
-                <h3>Sycophancy</h3>
-                <p>Too agreeable. Will validate incorrect user premises rather than correcting them.</p>
-            </div>
-            <div class="card">
-                <div class="badge badge-red">UX</div>
-                <h3>Product Gaps</h3>
-                <p>Missing basic features like Projects/Folders. Voice mode lags behind GPT-4o.</p>
-            </div>
-        </div>
-
-        <div id="strategic" class="findings-content grid-2" style="display: none;">
-            <div class="card">
-                <div class="badge badge-blue">Market</div>
-                <h3>The "Killer App" is Design</h3>
-                <p>Positioning opportunity: "The Best AI for Designers". Threatens Figma and v0.dev.</p>
-            </div>
-            <div class="card">
-                <div class="badge badge-blue">Competition</div>
-                <h3>Distribution Wins</h3>
-                <p>Google's 3.5B user base + Workspace integration is overcoming the "ChatGPT default" habit.</p>
-            </div>
-        </div>
-    </section>
-
-    <!-- Use Cases & Sentiment -->
-    <section id="usecases">
-        <div class="grid-2">
-            <div>
-                <h2>Top Use Cases</h2>
-                <div class="card">
-                    <div class="use-case-item">
-                        <div style="display:flex; justify-content:space-between;">
-                            <strong>UI/UX Design</strong>
-                            <span>35%</span>
-                        </div>
-                        <div class="progress-bar"><div class="progress-fill" style="width: 35%"></div></div>
-                    </div>
-                    <div class="use-case-item">
-                        <div style="display:flex; justify-content:space-between;">
-                            <strong>Coding & Dev</strong>
-                            <span>30%</span>
-                        </div>
-                        <div class="progress-bar"><div class="progress-fill" style="width: 30%"></div></div>
-                    </div>
-                    <div class="use-case-item">
-                        <div style="display:flex; justify-content:space-between;">
-                            <strong>Research</strong>
-                            <span>20%</span>
-                        </div>
-                        <div class="progress-bar"><div class="progress-fill" style="width: 20%"></div></div>
-                    </div>
-                    <div class="use-case-item">
-                        <div style="display:flex; justify-content:space-between;">
-                            <strong>Creative Content</strong>
-                            <span>15%</span>
-                        </div>
-                        <div class="progress-bar"><div class="progress-fill" style="width: 15%"></div></div>
-                    </div>
-                </div>
-            </div>
-            <div id="sentiment">
-                <h2>Sentiment Analysis</h2>
-                <div class="card">
-                    <canvas id="sentimentChart"></canvas>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Testimonials -->
-    <section>
-        <h2>Voice of the User</h2>
-        <div class="grid-3">
-            <div class="card">
-                <div class="testimonial">
-                    "Gemini 3 is not an app release. It is a phase transition in how thought moves through silicon."
-                </div>
-                <div class="author">@iruletheworldmo (27K views)</div>
-            </div>
-            <div class="card">
-                <div class="testimonial">
-                    "Best one shot UI design I've ever gotten from an AI."
-                </div>
-                <div class="author">@martabcalvinho (66K views)</div>
-            </div>
-            <div class="card">
-                <div class="testimonial">
-                    "Team feedback negative so far - overall a downgrade in AI coding experience."
-                </div>
-                <div class="author">@xpasky (2.4K views)</div>
-            </div>
-        </div>
-    </section>
-
-</main>
-
-<footer>
-    <p>Generated by AI Market Research Agent • Data from 170+ Sources</p>
-</footer>
-
-<script>
-    // Tab Switching Logic
-    function showTab(tabId) {
-        // Hide all content
-        document.querySelectorAll('.findings-content').forEach(el => el.style.display = 'none');
-        // Show selected
-        document.getElementById(tabId).style.display = 'grid';
-        
-        // Update buttons
-        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-        event.target.classList.add('active');
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>20-20-20 Eye Rest Timer</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card: #111827;
+      --muted: #9ca3af;
+      --text: #f8fafc;
+      --accent: #22c55e;
+      --accent2: #3b82f6;
+      --danger: #ef4444;
+      --border: #1f2937;
     }
 
-    // Chart.js Initialization
-    const ctx = document.getElementById('sentimentChart').getContext('2d');
-    new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-            labels: ['Positive', 'Negative', 'Neutral'],
-            datasets: [{
-                data: [62, 28, 10],
-                backgroundColor: [
-                    '#10B981', // Green
-                    '#EF4444', // Red
-                    '#9CA3AF'  // Gray
-                ],
-                borderWidth: 0,
-                hoverOffset: 4
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'bottom',
-                    labels: {
-                        font: { family: 'Inter' },
-                        usePointStyle: true
-                    }
-                }
-            },
-            cutout: '70%'
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: radial-gradient(circle at top, #1e293b, var(--bg));
+      color: var(--text);
+      min-height: 100vh;
+      padding: 24px;
+    }
+
+    .app {
+      max-width: 780px;
+      margin: 0 auto;
+      display: grid;
+      gap: 18px;
+    }
+
+    .card {
+      background: rgba(17, 24, 39, 0.92);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 18px;
+    }
+
+    h1, h2 { margin: 0 0 12px 0; }
+    h1 { font-size: 1.6rem; }
+    h2 { font-size: 1.1rem; color: #e2e8f0; }
+    p { margin: 8px 0; color: var(--muted); }
+
+    .row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    button {
+      border: none;
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      color: white;
+      transition: opacity .2s;
+    }
+
+    button:disabled { cursor: not-allowed; opacity: .45; }
+    .primary { background: var(--accent); }
+    .secondary { background: var(--accent2); }
+    .danger { background: var(--danger); }
+
+    .big {
+      font-size: 2.3rem;
+      font-weight: 700;
+      letter-spacing: .03em;
+      margin: 8px 0;
+    }
+
+    .status {
+      font-size: .95rem;
+      color: #cbd5e1;
+      margin-top: 6px;
+    }
+
+    .list {
+      margin: 10px 0 0;
+      padding: 0;
+      list-style: none;
+      display: grid;
+      gap: 8px;
+    }
+
+    .list li {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px;
+      color: #d1d5db;
+      font-size: .92rem;
+    }
+
+    .overlay {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: rgba(2, 6, 23, .8);
+      z-index: 999;
+      padding: 20px;
+    }
+
+    .overlay.show { display: flex; }
+
+    .overlay-card {
+      width: min(460px, 100%);
+      text-align: center;
+      background: #111827;
+      border: 1px solid #334155;
+      border-radius: 16px;
+      padding: 24px;
+    }
+
+    .overlay-card h3 { margin-top: 0; }
+    .count {
+      font-size: 4rem;
+      margin: 10px 0;
+      font-weight: 800;
+      color: #22c55e;
+    }
+
+    .small { font-size: .85rem; color: #9ca3af; }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <section class="card">
+      <h1>Eye Rest + Daily Usage Tracker</h1>
+      <p>Rings every 20 minutes and runs a 20-second eye-rest countdown.</p>
+      <div class="row">
+        <button id="startBtn" class="primary">Start Day</button>
+        <button id="finishBtn" class="danger" disabled>Finish Day</button>
+        <button id="notifyBtn" class="secondary">Enable Notifications</button>
+        <button id="manualRestBtn" class="secondary">Start 20s Rest Now</button>
+      </div>
+      <div class="status" id="sessionStatus">Status: Day not started</div>
+    </section>
+
+    <section class="card">
+      <h2>Next Eye Rest Reminder</h2>
+      <div class="big" id="nextReminder">20:00</div>
+      <p id="reminderHint">Starts after you click “Start Day”.</p>
+    </section>
+
+    <section class="card">
+      <h2>Today Summary</h2>
+      <p id="todayStart">Start: --</p>
+      <p id="todayFinish">Finish: --</p>
+      <p id="todayUsage">Tracked usage: --</p>
+      <p id="todayOff">Off-phone / sleep time: --</p>
+      <p class="small">Off-phone time = 24 hours - tracked usage.</p>
+    </section>
+
+    <section class="card">
+      <h2>History (Saved on this device)</h2>
+      <ul id="history" class="list"></ul>
+    </section>
+  </main>
+
+  <div class="overlay" id="restOverlay" aria-live="assertive" role="dialog" aria-modal="true">
+    <div class="overlay-card">
+      <h3>Look away and rest your eyes 👀</h3>
+      <div class="count" id="restCount">20</div>
+      <p>Keep looking at something far away until timer ends.</p>
+      <button id="skipRestBtn" class="danger">Skip</button>
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_KEY = 'eye-rest-daily-data-v1';
+    const REMINDER_INTERVAL_SECONDS = 20 * 60;
+    const REST_SECONDS = 20;
+
+    const state = {
+      running: false,
+      dayStart: null,
+      reminderLeft: REMINDER_INTERVAL_SECONDS,
+      reminderTimer: null,
+      restTimer: null,
+      restLeft: REST_SECONDS,
+      data: loadData()
+    };
+
+    const els = {
+      startBtn: document.getElementById('startBtn'),
+      finishBtn: document.getElementById('finishBtn'),
+      notifyBtn: document.getElementById('notifyBtn'),
+      manualRestBtn: document.getElementById('manualRestBtn'),
+      sessionStatus: document.getElementById('sessionStatus'),
+      nextReminder: document.getElementById('nextReminder'),
+      reminderHint: document.getElementById('reminderHint'),
+      todayStart: document.getElementById('todayStart'),
+      todayFinish: document.getElementById('todayFinish'),
+      todayUsage: document.getElementById('todayUsage'),
+      todayOff: document.getElementById('todayOff'),
+      history: document.getElementById('history'),
+      restOverlay: document.getElementById('restOverlay'),
+      restCount: document.getElementById('restCount'),
+      skipRestBtn: document.getElementById('skipRestBtn')
+    };
+
+    function loadData() {
+      try {
+        return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+      } catch {
+        return {};
+      }
+    }
+
+    function saveData() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state.data));
+    }
+
+    function todayKey() {
+      return new Date().toISOString().slice(0, 10);
+    }
+
+    function formatTime(ts) {
+      if (!ts) return '--';
+      return new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
+
+    function formatDuration(ms) {
+      if (ms <= 0) return '0m';
+      const totalMin = Math.floor(ms / 60000);
+      const h = Math.floor(totalMin / 60);
+      const m = totalMin % 60;
+      return `${h}h ${m}m`;
+    }
+
+    function pad(n) {
+      return n.toString().padStart(2, '0');
+    }
+
+    function updateReminderUI() {
+      const m = Math.floor(state.reminderLeft / 60);
+      const s = state.reminderLeft % 60;
+      els.nextReminder.textContent = `${pad(m)}:${pad(s)}`;
+    }
+
+    function beep() {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtx) return;
+      const ctx = new AudioCtx();
+      const now = ctx.currentTime;
+      // Offset values are in seconds to produce a short triple-beep pattern.
+      [0, 0.22, 0.44].forEach((offset) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.value = 880;
+        gain.gain.value = 0.08;
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now + offset);
+        osc.stop(now + offset + 0.18);
+      });
+      setTimeout(() => ctx.close(), 1200);
+    }
+
+    function notify(title, body) {
+      if (Notification.permission === 'granted') {
+        new Notification(title, { body });
+      }
+    }
+
+    function startRest() {
+      clearInterval(state.restTimer);
+      state.restLeft = REST_SECONDS;
+      els.restCount.textContent = String(state.restLeft);
+      els.restOverlay.classList.add('show');
+
+      state.restTimer = setInterval(() => {
+        state.restLeft -= 1;
+        els.restCount.textContent = String(state.restLeft);
+        if (state.restLeft <= 0) {
+          stopRest(true);
         }
-    });
+      }, 1000);
+    }
 
-    // Smooth Scroll for Nav
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-        anchor.addEventListener('click', function (e) {
-            e.preventDefault();
-            document.querySelector(this.getAttribute('href')).scrollIntoView({
-                behavior: 'smooth'
-            });
-        });
-    });
-</script>
+    function stopRest(completed = false) {
+      clearInterval(state.restTimer);
+      els.restOverlay.classList.remove('show');
+      if (completed) {
+        beep();
+        notify('Eye rest done', 'Great! Back to work.');
+      }
+    }
 
+    function startReminderLoop() {
+      clearInterval(state.reminderTimer);
+      state.reminderLeft = REMINDER_INTERVAL_SECONDS;
+      updateReminderUI();
+      els.reminderHint.textContent = 'Timer is running.';
+
+      state.reminderTimer = setInterval(() => {
+        state.reminderLeft -= 1;
+        updateReminderUI();
+        if (state.reminderLeft <= 0) {
+          beep();
+          notify('Time to rest your eyes', '20 seconds break starts now.');
+          startRest();
+          state.reminderLeft = REMINDER_INTERVAL_SECONDS;
+          updateReminderUI();
+        }
+      }, 1000);
+    }
+
+    function stopReminderLoop() {
+      clearInterval(state.reminderTimer);
+      state.reminderLeft = REMINDER_INTERVAL_SECONDS;
+      updateReminderUI();
+      els.reminderHint.textContent = 'Starts after you click “Start Day”.';
+    }
+
+    function updateTodaySummary() {
+      const key = todayKey();
+      const rec = state.data[key];
+      if (!rec) {
+        els.todayStart.textContent = 'Start: --';
+        els.todayFinish.textContent = 'Finish: --';
+        els.todayUsage.textContent = 'Tracked usage: --';
+        els.todayOff.textContent = 'Off-phone / sleep time: --';
+        return;
+      }
+
+      els.todayStart.textContent = `Start: ${formatTime(rec.start)}`;
+      els.todayFinish.textContent = `Finish: ${formatTime(rec.finish)}`;
+
+      const end = rec.finish || Date.now();
+      const usageMs = Math.max(0, end - rec.start);
+      const fullDayMs = 24 * 60 * 60 * 1000;
+      const offMs = Math.max(0, fullDayMs - usageMs);
+
+      if (!rec.finish) {
+        els.todayUsage.textContent = `Tracked usage so far: ${formatDuration(usageMs)}`;
+        els.todayOff.textContent = 'Off-phone / sleep time: finish day to finalize';
+        return;
+      }
+
+      els.todayUsage.textContent = `Tracked usage: ${formatDuration(usageMs)}`;
+      els.todayOff.textContent = `Off-phone / sleep time: ${formatDuration(offMs)}`;
+    }
+
+    function renderHistory() {
+      const entries = Object.entries(state.data)
+        .sort(([a], [b]) => b.localeCompare(a))
+        .slice(0, 10);
+
+      if (!entries.length) {
+        els.history.innerHTML = '<li>No records yet.</li>';
+        return;
+      }
+
+      els.history.innerHTML = entries.map(([date, rec]) => {
+        const end = rec.finish || Date.now();
+        const usageMs = Math.max(0, end - rec.start);
+        return `<li><strong>${date}</strong> • Start ${formatTime(rec.start)} • Finish ${formatTime(rec.finish)} • Usage ${formatDuration(usageMs)}</li>`;
+      }).join('');
+    }
+
+    function setButtons() {
+      els.startBtn.disabled = state.running;
+      els.finishBtn.disabled = !state.running;
+      els.sessionStatus.textContent = state.running
+        ? `Status: Running since ${formatTime(state.dayStart)}`
+        : 'Status: Day not started';
+    }
+
+    function startDay() {
+      const key = todayKey();
+      const now = Date.now();
+      state.data[key] = { start: now, finish: null };
+      state.dayStart = now;
+      state.running = true;
+      saveData();
+      startReminderLoop();
+      setButtons();
+      updateTodaySummary();
+      renderHistory();
+    }
+
+    function finishDay() {
+      const key = todayKey();
+      if (!state.data[key] || !state.data[key].start) return;
+      state.data[key].finish = Date.now();
+      state.running = false;
+      state.dayStart = null;
+      saveData();
+      stopReminderLoop();
+      stopRest();
+      setButtons();
+      updateTodaySummary();
+      renderHistory();
+    }
+
+    async function enableNotifications() {
+      if (!('Notification' in window)) {
+        alert('Notifications are not supported in this browser.');
+        return;
+      }
+      const permission = await Notification.requestPermission();
+      if (permission === 'granted') {
+        notify('Notifications enabled', 'You will now get eye-rest reminders.');
+      }
+    }
+
+    function resumeIfRunning() {
+      const key = todayKey();
+      const rec = state.data[key];
+      if (rec && rec.start && !rec.finish) {
+        state.running = true;
+        state.dayStart = rec.start;
+        startReminderLoop();
+      }
+    }
+
+    els.startBtn.addEventListener('click', startDay);
+    els.finishBtn.addEventListener('click', finishDay);
+    els.notifyBtn.addEventListener('click', enableNotifications);
+    els.manualRestBtn.addEventListener('click', startRest);
+    els.skipRestBtn.addEventListener('click', () => stopRest(false));
+
+    resumeIfRunning();
+    updateReminderUI();
+    updateTodaySummary();
+    renderHistory();
+    setButtons();
+  </script>
 </body>
 </html>
